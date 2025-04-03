@@ -12,7 +12,7 @@
 ## Установка
 
 ```bash
-pip install git+github.com/alridev/py-ch-api
+pip install git+https://github.com/alridev/py-ch-api
 ```
 
 ## Примеры использования

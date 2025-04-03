@@ -1,0 +1,31 @@
+[project]
+name = "pychapi"
+version = "0.1.0"
+description = "Асинхронная библиотека для работы с CH API"
+authors = [{ name = "alridev", email = "alridev@outlook.com" }]
+dependencies = ["aiohttp>=3.9.0", "pydantic>=2.0.0"]
+requires-python = ">=3.9"
+
+
+[project.optional-dependencies]
+dev = ["autoflake>=2.3.1", "pytest>=8.3.5", "pytest-asyncio>=0.23.5", "setuptools"]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"

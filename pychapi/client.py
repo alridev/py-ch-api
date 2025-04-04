@@ -45,6 +45,7 @@ class ChClient:
             setter_by_table="/setter/%s",
         )
         self.timeout = timeout
+        self.background = ChClientBackground(self)
 
     async def _make_request(
         self,

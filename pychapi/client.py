@@ -2,7 +2,8 @@
 Асинхронный клиент для работы с CH API
 """
 from typing import Dict, List, Optional, Any, Union
-
+from typing_extensions import override
+import asyncio  
 import aiohttp
 from pydantic import BaseModel
 
@@ -10,8 +11,6 @@ from .models import (
     SetterEvent,
     SetterRequestBody,
     SetterManyResponseBody,
-    SetterByTableResponseBody,
-    SetterOneResponseBody,
     ChEndpoints,
 )
 
@@ -40,7 +39,11 @@ class ChClient:
         self.base_url = base_url.rstrip("/")
         self.setter_token = setter_token
         self.getter_token = getter_token
-        self.endpoints = endpoints or ChEndpoints()
+        self.endpoints = endpoints or ChEndpoints(
+            setter_one="/setter",
+            setter_many="/setter/many",
+            setter_by_table="/setter/%s",
+        )
         self.timeout = timeout
 
     async def _make_request(
@@ -147,3 +150,27 @@ class ChClient:
         )
         if response and "error" in response:
             raise ValueError(f"Server error: {response['error']}") 
+
+
+class ChClientBackground:
+    """Клиент для работы с CH API в фоновом режиме"""
+
+    def __init__(self, client: ChClient):
+        self.client = client
+
+    def setter_one(self, event: SetterEvent) -> asyncio.Task[None]:
+        """Отправка одного события в фоновом режиме"""
+        return asyncio.create_task(self.client.setter_one(event))
+    
+    def setter_many(self, events: List[SetterEvent]) -> asyncio.Task[Dict[int, str]]:
+        """Пакетная отправка событий в фоновом режиме"""
+        return asyncio.create_task(self.client.setter_many(events))
+    
+    def setter_by_table(self, table_name: str, data: Dict[str, Any]) -> asyncio.Task[None]:
+        """Отправка данных в конкретную таблицу в фоновом режиме"""
+        return asyncio.create_task(self.client.setter_by_table(table_name, data))
+    
+    
+
+    
+    

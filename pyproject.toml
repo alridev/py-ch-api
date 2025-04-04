@@ -1,6 +1,6 @@
 [project]
 name = "pychapi"
-version = "0.1.0"
+version = "0.1.1"
 description = "Асинхронная библиотека для работы с CH API"
 authors = [{ name = "alridev", email = "alridev@outlook.com" }]
 dependencies = ["aiohttp>=3.9.0", "pydantic>=2.0.0"]
@@ -8,7 +8,7 @@ requires-python = ">=3.9"
 
 
 [project.optional-dependencies]
-dev = ["autoflake>=2.3.1", "pytest>=8.3.5", "pytest-asyncio>=0.23.5", "setuptools"]
+dev = ["autoflake>=2.3.1", "pytest>=8.3.5", "pytest-asyncio>=0.23.5", "setuptools", "mypy>=1.14.1"]
 
 
 [build-system]

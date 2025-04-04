@@ -3,13 +3,14 @@
 """
 import pytest
 from unittest.mock import AsyncMock, patch
+from typing import Dict, Any
 
 from pychapi.client import ChClient
 from pychapi.models import SetterEvent, ChEndpoints
 
 
 @pytest.fixture
-def client():
+def client() -> ChClient:
     """Фикстура для создания клиента"""
     return ChClient(
         base_url="http://localhost:8080",
@@ -19,14 +20,14 @@ def client():
 
 
 @pytest.mark.asyncio
-async def test_setter_one_success(client):
+async def test_setter_one_success(client: ChClient) -> None:
     """Тест успешной отправки одного события"""
     event = SetterEvent(
         table_name="events",
         data={"field": "value"}
     )
     
-    mock_response = {}
+    mock_response: Dict[str, Any] = {}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 200
     mock_response_obj.json = AsyncMock(return_value=mock_response)
@@ -39,14 +40,14 @@ async def test_setter_one_success(client):
 
 
 @pytest.mark.asyncio
-async def test_setter_one_error(client):
+async def test_setter_one_error(client: ChClient) -> None:
     """Тест отправки одного события с ошибкой"""
     event = SetterEvent(
         table_name="events",
         data={"field": "value"}
     )
     
-    mock_response = {"error": "invalid data"}
+    mock_response: Dict[str, str] = {"error": "invalid data"}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 400
     mock_response_obj.json = AsyncMock(return_value=mock_response)
@@ -60,7 +61,7 @@ async def test_setter_one_error(client):
 
 
 @pytest.mark.asyncio
-async def test_setter_many_success(client):
+async def test_setter_many_success(client: ChClient) -> None:
     """Тест успешной пакетной отправки событий"""
     events = [
         SetterEvent(
@@ -73,7 +74,7 @@ async def test_setter_many_success(client):
         ),
     ]
     
-    mock_response = {"errors": {}}
+    mock_response: Dict[str, Dict[int, str]] = {"errors": {}}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 200
     mock_response_obj.json = AsyncMock(return_value=mock_response)
@@ -88,7 +89,7 @@ async def test_setter_many_success(client):
 
 
 @pytest.mark.asyncio
-async def test_setter_many_with_errors(client):
+async def test_setter_many_with_errors(client: ChClient) -> None:
     """Тест пакетной отправки событий с ошибками"""
     events = [
         SetterEvent(
@@ -101,7 +102,7 @@ async def test_setter_many_with_errors(client):
         ),
     ]
     
-    mock_response = {"errors": {0: "invalid data"}}
+    mock_response: Dict[str, Dict[int, str]] = {"errors": {0: "invalid data"}}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 200
     mock_response_obj.json = AsyncMock(return_value=mock_response)
@@ -116,11 +117,11 @@ async def test_setter_many_with_errors(client):
 
 
 @pytest.mark.asyncio
-async def test_setter_by_table_success(client):
+async def test_setter_by_table_success(client: ChClient) -> None:
     """Тест успешной отправки данных в конкретную таблицу"""
-    data = {"field": "value"}
+    data: Dict[str, str] = {"field": "value"}
     
-    mock_response = {}
+    mock_response: Dict[str, Any] = {}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 200
     mock_response_obj.json = AsyncMock(return_value=mock_response)
@@ -133,11 +134,11 @@ async def test_setter_by_table_success(client):
 
 
 @pytest.mark.asyncio
-async def test_setter_by_table_error(client):
+async def test_setter_by_table_error(client: ChClient) -> None:
     """Тест отправки данных в конкретную таблицу с ошибкой"""
-    data = {"field": "value"}
+    data: Dict[str, str] = {"field": "value"}
     
-    mock_response = {"error": "invalid data"}
+    mock_response: Dict[str, str] = {"error": "invalid data"}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 400
     mock_response_obj.json = AsyncMock(return_value=mock_response)
@@ -151,7 +152,7 @@ async def test_setter_by_table_error(client):
 
 
 @pytest.mark.asyncio
-async def test_custom_endpoints():
+async def test_custom_endpoints() -> None:
     """Тест использования пользовательских эндпоинтов"""
     endpoints = ChEndpoints(
         setter_many="/custom/many",
@@ -171,7 +172,7 @@ async def test_custom_endpoints():
         data={"field": "value"}
     )
     
-    mock_response = {}
+    mock_response: Dict[str, Any] = {}
     mock_response_obj = AsyncMock()
     mock_response_obj.status = 200
     mock_response_obj.json = AsyncMock(return_value=mock_response)

@@ -1,19 +1,21 @@
 """
 Асинхронный клиент для работы с CH API
 """
-from typing import Dict, List, Optional, Any, Union
-from typing_extensions import override
-import asyncio  
+import asyncio
+import logging
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+
 import aiohttp
 from pydantic import BaseModel
 
 from .models import (
-    SetterEvent,
-    SetterRequestBody,
-    SetterManyResponseBody,
     ChEndpoints,
+    SetterEvent,
+    SetterManyResponseBody,
+    SetterRequestBody,
 )
 
+T = TypeVar('T')
 
 class ChClient:
     """Клиент для работы с CH API"""
@@ -156,20 +158,47 @@ class ChClient:
 class ChClientBackground:
     """Клиент для работы с CH API в фоновом режиме"""
 
-    def __init__(self, client: ChClient):
+    def __init__(self, client: ChClient, error_callback: Optional[Callable[[BaseException], None]] = None):
+        """
+        Инициализация фонового клиента
+
+        Args:
+            client: Основной клиент CH API
+            error_callback: Функция обратного вызова для обработки ошибок (по умолчанию логирует ошибки)
+        """
         self.client = client
+        self.error_callback = error_callback or self._default_error_handler
+        
+    def _default_error_handler(self, exc: BaseException) -> None:
+        """Обработчик ошибок по умолчанию"""
+        logging.warning("Ошибка в фоновой задаче: %s", exc)
+        
+    def _handle_background_task(self, task: asyncio.Task[T]) -> None:
+        """Обработка ошибок фоновой задачи"""
+        try:
+            exc = task.exception()
+            if exc:
+                self.error_callback(exc)
+        except asyncio.CancelledError:
+            pass
 
     def setter_one(self, event: SetterEvent) -> asyncio.Task[None]:
         """Отправка одного события в фоновом режиме"""
-        return asyncio.create_task(self.client.setter_one(event))
+        task = asyncio.create_task(self.client.setter_one(event))
+        task.add_done_callback(self._handle_background_task)
+        return task
     
     def setter_many(self, events: List[SetterEvent]) -> asyncio.Task[Dict[int, str]]:
         """Пакетная отправка событий в фоновом режиме"""
-        return asyncio.create_task(self.client.setter_many(events))
+        task = asyncio.create_task(self.client.setter_many(events))
+        task.add_done_callback(self._handle_background_task)
+        return task
     
     def setter_by_table(self, table_name: str, data: Dict[str, Any]) -> asyncio.Task[None]:
         """Отправка данных в конкретную таблицу в фоновом режиме"""
-        return asyncio.create_task(self.client.setter_by_table(table_name, data))
+        task = asyncio.create_task(self.client.setter_by_table(table_name, data))
+        task.add_done_callback(self._handle_background_task)
+        return task
     
     
 
